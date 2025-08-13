@@ -11,12 +11,31 @@ Modern TypeScript library boilerplate (ESM + CJS) built with **Vite**, **Vitest*
 - GitHub Actions: CI + Publish to npm on tag
 
 ## Scripts
-- `npm run build` – build library
-- `npm test` – run tests with coverage
-- `npm run lint` – lint with Biome
-- `npm run format` – format with Biome
-- `npm run typecheck` – TS type checking (no emit)
-- `npm run check` – lint + typecheck + tests
+- `pnpm run build` – build library
+- `pnpm test` – run tests with coverage
+- `pnpm run lint` – lint with Biome
+- `pnpm run format` – format with Biome
+- `pnpm run typecheck` – TS type checking (no emit)
+- `pnpm run check` – lint + typecheck + tests
+
+## Code Coverage
+
+This project uses [Codecov](https://codecov.io) for code coverage reporting.
+
+After running the tests, you can upload the coverage report to Codecov:
+
+```bash
+pnpm test
+pnpm run codecov
+```
+
+In a CI environment, you will need to set the `CODECOV_TOKEN` environment variable.
+
+```bash
+export CODECOV_TOKEN="your-token"
+pnpm test
+pnpm run codecov
+```
 
 ## Using the template
 1. Replace the package name in `package.json` with your own (optionally scoped, e.g. `@scope/pkg`).
@@ -32,10 +51,10 @@ Modern TypeScript library boilerplate (ESM + CJS) built with **Vite**, **Vitest*
 2. Add it as `NPM_TOKEN` in your repo **Settings → Secrets and variables → Actions**.
 3. Bump and tag locally, then push:
    ```bash
-   npm version patch   # or minor / major
+   pnpm version patch   # or minor / major
    git push --follow-tags
    ```
-4. The `release.yml` workflow will build and `npm publish` automatically.
+4. The `release.yml` workflow will build and `pnpm publish` automatically.
 
 ## Importing
 ```ts
@@ -47,7 +66,7 @@ const { sum } = require("your-lib-name");
 ---
 
 ## 🚀 Automated releases with Changesets
-- Create a changeset: `npm run changeset` (choose patch/minor/major and describe changes)
+- Create a changeset: `pnpm run changeset` (choose patch/minor/major and describe changes)
 - Commit the generated file(s) under `.changeset/`
 - Push to `main`. The **Release** workflow will open/refresh a release PR with version bumps and changelog.
 - Merge the release PR. The workflow will publish to npm using `NPM_TOKEN`.
