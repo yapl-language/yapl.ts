@@ -1,5 +1,5 @@
-import type { Vars } from ".."
-import getPath from "./getPath"
+import type { Vars } from "..";
+import getPath from "./getPath";
 
 /**
  * Evaluates a simple condition expression for if statements.
@@ -23,92 +23,104 @@ import getPath from "./getPath"
  * - status == "active"
  * - user.name is defined and user.name != ""
  */
-export default function evaluateCondition(condition: string, vars: Vars): boolean {
-	const trimmed = condition.trim()
+export default function evaluateCondition(
+	condition: string,
+	vars: Vars,
+): boolean {
+	const trimmed = condition.trim();
 
 	// Handle logical operators (and, or)
-	const andMatch = trimmed.match(/^(.+?)\s+and\s+(.+)$/)
+	const andMatch = trimmed.match(/^(.+?)\s+and\s+(.+)$/);
 	if (andMatch) {
-		const [, leftCondition, rightCondition] = andMatch
-		return evaluateCondition(leftCondition.trim(), vars) && evaluateCondition(rightCondition.trim(), vars)
+		const [, leftCondition, rightCondition] = andMatch;
+		return (
+			evaluateCondition(leftCondition.trim(), vars) &&
+			evaluateCondition(rightCondition.trim(), vars)
+		);
 	}
 
-	const orMatch = trimmed.match(/^(.+?)\s+or\s+(.+)$/)
+	const orMatch = trimmed.match(/^(.+?)\s+or\s+(.+)$/);
 	if (orMatch) {
-		const [, leftCondition, rightCondition] = orMatch
-		return evaluateCondition(leftCondition.trim(), vars) || evaluateCondition(rightCondition.trim(), vars)
+		const [, leftCondition, rightCondition] = orMatch;
+		return (
+			evaluateCondition(leftCondition.trim(), vars) ||
+			evaluateCondition(rightCondition.trim(), vars)
+		);
 	}
 
 	// Handle "is defined" / "is not defined"
-	const isDefinedMatch = trimmed.match(/^(.+?)\s+is\s+(not\s+)?defined$/)
+	const isDefinedMatch = trimmed.match(/^(.+?)\s+is\s+(not\s+)?defined$/);
 	if (isDefinedMatch) {
-		const [, varPath, notModifier] = isDefinedMatch
-		const value = getPath(vars, varPath.trim())
-		const isDefined = value !== undefined && value !== null
-		return notModifier ? !isDefined : isDefined
+		const [, varPath, notModifier] = isDefinedMatch;
+		const value = getPath(vars, varPath.trim());
+		const isDefined = value !== undefined && value !== null;
+		return notModifier ? !isDefined : isDefined;
 	}
 
 	// Handle "is empty" / "is not empty"
-	const isEmptyMatch = trimmed.match(/^(.+?)\s+is\s+(not\s+)?empty$/)
+	const isEmptyMatch = trimmed.match(/^(.+?)\s+is\s+(not\s+)?empty$/);
 	if (isEmptyMatch) {
-		const [, varPath, notModifier] = isEmptyMatch
-		const value = getPath(vars, varPath.trim())
+		const [, varPath, notModifier] = isEmptyMatch;
+		const value = getPath(vars, varPath.trim());
 		const isEmpty =
 			value === undefined ||
 			value === null ||
 			value === "" ||
 			(Array.isArray(value) && value.length === 0) ||
-			(typeof value === "object" && Object.keys(value).length === 0)
-		return notModifier ? !isEmpty : isEmpty
+			(typeof value === "object" && Object.keys(value).length === 0);
+		return notModifier ? !isEmpty : isEmpty;
 	}
 
 	// Handle equality comparisons (== and !=)
-	const comparisonMatch = trimmed.match(/^(.+?)\s*(==|!=)\s*(.+)$/)
+	const comparisonMatch = trimmed.match(/^(.+?)\s*(==|!=)\s*(.+)$/);
 	if (comparisonMatch) {
-		const [, leftExpr, operator, rightExpr] = comparisonMatch
-		const leftValue = parseValue(leftExpr.trim(), vars)
-		const rightValue = parseValue(rightExpr.trim(), vars)
+		const [, leftExpr, operator, rightExpr] = comparisonMatch;
+		const leftValue = parseValue(leftExpr.trim(), vars);
+		const rightValue = parseValue(rightExpr.trim(), vars);
 
 		if (operator === "==") {
-			return leftValue === rightValue
+			return leftValue === rightValue;
 		}
 		if (operator === "!=") {
-			return leftValue !== rightValue
+			return leftValue !== rightValue;
 		}
 	}
 
 	// Handle simple truthiness check (just a variable name)
-	const simpleVarMatch = trimmed.match(/^[a-zA-Z0-9_.]+$/)
+	const simpleVarMatch = trimmed.match(/^[a-zA-Z0-9_.]+$/);
 	if (simpleVarMatch) {
-		const value = getPath(vars, trimmed)
-		return Boolean(value)
+		const value = getPath(vars, trimmed);
+		return Boolean(value);
 	}
 
 	// If we can't parse the condition, default to false for safety
-	return false
+	return false;
 }
 
 /**
  * Parse a value expression - could be a variable reference, string literal, number, or boolean
  */
 function parseValue(expr: string, vars: Vars): unknown {
-	const trimmed = expr.trim()
+	const trimmed = expr.trim();
 
 	// String literal (quoted)
-	if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
-		return trimmed.slice(1, -1)
+	if (
+		(trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+		(trimmed.startsWith("'") && trimmed.endsWith("'"))
+	) {
+		return trimmed.slice(1, -1);
 	}
 
 	// Number literal
 	if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
-		return Number(trimmed)
+		return Number(trimmed);
 	}
 
 	// Boolean literal
-	if (trimmed === "true") return true
-	if (trimmed === "false") return false
-	if (trimmed === "null") return null
+	if (trimmed === "true") return true;
+	if (trimmed === "false") return false;
+	if (trimmed === "null") return null;
 
 	// Variable reference
-	return getPath(vars, trimmed)
+	return getPath(vars, trimmed);
 }

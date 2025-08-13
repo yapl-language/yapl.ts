@@ -5,13 +5,8 @@
 			"label": "Run unit tests for yapl-ts",
 			"type": "shell",
 			"command": "pnpm",
-			"args": [
-				"-s",
-				"test"
-			],
-			"problemMatcher": [
-				"$tsc"
-			],
+			"args": ["-s", "test"],
+			"problemMatcher": ["$tsc"],
 			"group": "build"
 		}
 	]

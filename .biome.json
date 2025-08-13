@@ -1,21 +1,20 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  },
-  "files": {
-    "include": [
-      "src",
-      "test",
-      "vite.config.ts"
-    ]
-  }
+	"$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "space",
+		"indentWidth": 2
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noExplicitAny": "off"
+			}
+		}
+	},
+	"files": {
+		"ignore": ["coverage/**", "dist/**", "node_modules/**"]
+	}
 }
