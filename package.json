@@ -43,7 +43,7 @@
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"check": "biome ci src/ && tsc -p tsconfig.json --noEmit",
+		"check": "biome ci . && tsc -p tsconfig.json --noEmit",
 		"prepublishOnly": "pnpm run build && pnpm test",
 		"prepare": "husky",
 		"codecov": "codecov",
