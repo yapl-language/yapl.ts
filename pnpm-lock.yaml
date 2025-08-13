@@ -21,7 +21,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@20.19.10))
       codecov:
-        specifier: ^3.8.3
+        specifier: ~3.8.3
         version: 3.8.3
       husky:
         specifier: ^9.1.0
