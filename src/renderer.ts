@@ -94,9 +94,20 @@ export class YAPLRenderer {
 	private strictPaths: boolean;
 	private maxDepth: number;
 	private whitespaceOptions: WhitespaceOptions;
-	private resolvePath?: RendererOptions["resolvePath"];
-	private loadFile?: RendererOptions["loadFile"];
-	private ensureExtension: (p: string) => string;
+	private _resolvePath?: RendererOptions["resolvePath"];
+	private _loadFile?: RendererOptions["loadFile"];
+	private _ensureExtension: (p: string) => string;
+
+	// Public getters for browser compatibility
+	get loadFile() {
+		return this._loadFile;
+	}
+	get resolvePath() {
+		return this._resolvePath;
+	}
+	get ensureExtension() {
+		return this._ensureExtension;
+	}
 
 	constructor(opts: RendererOptions = {}) {
 		this.baseDir = opts.baseDir ? opts.baseDir : "";
@@ -107,9 +118,9 @@ export class YAPLRenderer {
 			lstripBlocks: opts.whitespace?.lstripBlocks ?? true,
 			dedentBlocks: opts.whitespace?.dedentBlocks ?? true,
 		};
-		this.resolvePath = opts.resolvePath;
-		this.loadFile = opts.loadFile;
-		this.ensureExtension =
+		this._resolvePath = opts.resolvePath;
+		this._loadFile = opts.loadFile;
+		this._ensureExtension =
 			opts.ensureExtension ?? ((p) => (p.endsWith(".yapl") ? p : `${p}.yapl`));
 	}
 
@@ -561,25 +572,25 @@ export class YAPLRenderer {
 	// ---------- Loader/Resolver helpers ----------
 
 	private resolveTemplatePath(templateRef: string, fromDir: string): string {
-		if (!this.resolvePath) {
+		if (!this._resolvePath) {
 			throw new Error(
 				"No resolvePath provided. File-based operations are not available in this environment.",
 			);
 		}
-		return this.resolvePath(
-			this.ensureExtension(templateRef),
+		return this._resolvePath(
+			this._ensureExtension(templateRef),
 			fromDir,
-			this.ensureExtension,
+			this._ensureExtension,
 		);
 	}
 
 	private async loadTemplateFile(absolutePath: string): Promise<string> {
-		if (!this.loadFile) {
+		if (!this._loadFile) {
 			throw new Error(
 				"No loadFile provided. File-based operations are not available in this environment.",
 			);
 		}
-		return await this.loadFile(absolutePath);
+		return await this._loadFile(absolutePath);
 	}
 
 	private dirname(p: string): string {

@@ -1,4 +1,9 @@
-import * as path from "node:path";
+// Browser-compatible path utilities
+function resolvePath(basePath: string): string {
+	// Simple browser path resolution - just normalize slashes
+	return basePath.replace(/\\/g, "/").replace(/\/+/g, "/");
+}
+
 export { default as protectYaplPlugin } from "./markdown/protectYaplPlugin";
 export type {
 	Vars,
@@ -15,6 +20,14 @@ export interface YAPLOptions {
 	strictPaths?: boolean; // unused in browser wrapper
 	maxDepth?: number;
 	whitespace?: WhitespaceOptions;
+	// Browser-specific options
+	resolvePath?: (
+		templateRef: string,
+		fromDir: string,
+		ensureExt: (p: string) => string,
+	) => string;
+	loadFile?: (absolutePath: string) => Promise<string>;
+	ensureExtension?: (p: string) => string;
 }
 
 export class YAPL {
@@ -22,16 +35,19 @@ export class YAPL {
 	protected renderer: YAPLRenderer;
 
 	constructor(opts: YAPLOptions) {
-		this.baseDir = path.resolve(opts.baseDir);
+		this.baseDir = resolvePath(opts.baseDir);
 		this.renderer = new YAPLRenderer({
 			baseDir: this.baseDir,
 			maxDepth: opts.maxDepth,
 			whitespace: opts.whitespace,
+			resolvePath: opts.resolvePath,
+			loadFile: opts.loadFile,
+			ensureExtension: opts.ensureExtension,
 		});
 	}
 
 	setBaseDir(dir: string) {
-		this.baseDir = path.resolve(dir);
+		this.baseDir = resolvePath(dir);
 		this.renderer.setBaseDir(this.baseDir);
 	}
 
@@ -43,17 +59,31 @@ export class YAPL {
 		return await this.renderer.renderString(
 			templateSource,
 			vars,
-			currentDir ? path.resolve(currentDir) : this.baseDir,
+			currentDir ? resolvePath(currentDir) : this.baseDir,
 		);
 	}
 
 	async render(
-		_templatePath: string,
-		_vars: Record<string, unknown> = {},
+		templatePath: string,
+		vars: Record<string, unknown> = {},
 	): Promise<Prompt> {
-		// Browser wrapper has no file system access
-		throw new Error(
-			"loadTemplateFile is not available in the browser. Use renderString for browser usage.",
-		);
+		// Use the renderer's template loading if loadFile is provided
+		if (!this.renderer.loadFile) {
+			throw new Error(
+				"File loading is not available. Provide a loadFile function in YAPLOptions or use renderString for browser usage.",
+			);
+		}
+
+		// Load the template file and render it
+		const absolutePath = this.renderer.resolvePath
+			? this.renderer.resolvePath(
+					templatePath,
+					this.baseDir,
+					this.renderer.ensureExtension,
+				)
+			: templatePath;
+
+		const templateContent = await this.renderer.loadFile(absolutePath);
+		return await this.renderString(templateContent, vars, this.baseDir);
 	}
 }
