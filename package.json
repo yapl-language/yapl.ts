@@ -28,13 +28,6 @@
   "bugs": {
     "url": "https://github.com/yapl-language/yapl.ts/issues"
   },
-  "contributors": [
-    {
-      "name": "Einfach AI",
-      "email": "hi@einfachai.com",
-      "url": "https://einfachai.com"
-    }
-  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -60,9 +53,10 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "check": "biome ci . && tsc -p tsconfig.json --noEmit && vitest run",
-    "prepublishOnly": "npm run build && npm test",
+    "check": "biome ci . && tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "pnpm run build && pnpm test",
     "prepare": "husky",
+    "codecov": "codecov",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish"
@@ -75,6 +69,7 @@
     "@changesets/cli": "^2.27.8",
     "@types/node": "^20.14.0",
     "@vitest/coverage-v8": "^3.2.4",
+    "codecov": "~3.8.3",
     "husky": "^9.1.0",
     "lint-staged": "^15.2.10",
     "typescript": "^5.5.0",
