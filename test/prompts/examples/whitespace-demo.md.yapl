@@ -1,0 +1,21 @@
+# Whitespace Control Demo
+
+{%- block intro -%}
+    This demonstrates YAPL's whitespace control features.
+
+    The {%- and -%} syntax trims whitespace around tags.
+    The dedentBlocks option removes common indentation.
+{%- endblock %}
+
+{% block features %}
+    ## Features
+
+    - Automatic dedenting of block content
+    - Whitespace trimming with {%- -%} syntax
+    - Global trimBlocks and lstripBlocks options
+    - Clean, professional prompt output
+{% endblock %}
+
+{%- block conclusion -%}
+    Result: Clean templates with readable source code!
+{%- endblock %}

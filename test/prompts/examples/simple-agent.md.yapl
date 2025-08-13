@@ -1,0 +1,15 @@
+{% extends "../base/system.md" %}
+
+{% block persona -%}
+{{ super() }}
+You are {{ agent_type | default("a specialized agent") }} focused on {{ domain | default("general assistance") }}.
+{%- endblock %}
+
+{% block guidance -%}
+{{ super() }}
+
+## Your Capabilities
+- {{ capability_1 | default("Problem solving") }}
+- {{ capability_2 | default("Information analysis") }}
+- {{ capability_3 | default("Clear communication") }}
+{%- endblock %}

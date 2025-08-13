@@ -1,0 +1,11 @@
+# Whitespace Test
+
+{% block content -%}
+    This block has indentation that should be cleaned up.
+
+    Multiple lines with consistent indentation.
+
+        Even nested indentation should work.
+{%- endblock %}
+
+Normal content after the block.

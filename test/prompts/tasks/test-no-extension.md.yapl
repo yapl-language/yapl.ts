@@ -1,0 +1,12 @@
+{% extends "../base/system.md" %}
+{% mixin "../mixins/safety.md", "../mixins/tone_friendly.md" %}
+
+{% block persona %}
+	{{ super() }}
+	You are a test assistant for {{ domain | default("testing") }}.
+{% endblock %}
+
+{% block guidance %}
+{{ super() }}
+This is a test template without .yapl extensions in directives.
+{% endblock %}

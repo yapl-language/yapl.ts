@@ -1,0 +1,12 @@
+# System
+{% block persona %}
+	You are a helpful AI.
+{% endblock %}
+
+{% block output_format %}
+	Respond in markdown.
+{% endblock %}
+
+{% block guidance %}
+	Be concise and accurate.
+{% endblock %}

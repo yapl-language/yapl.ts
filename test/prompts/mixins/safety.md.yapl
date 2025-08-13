@@ -1,0 +1,4 @@
+{% block guidance %}
+	{{ super() }}
+	Avoid unsafe instructions; refuse politely when necessary.
+{% endblock %}

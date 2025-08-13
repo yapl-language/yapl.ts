@@ -1,0 +1,19 @@
+{% extends "../base/system.md.yapl" %}
+{% mixin "../mixins/safety.md.yapl", "../mixins/tone_friendly.md.yapl" %}
+
+{% block persona %}
+	{{ super() }}
+	You specialize in summarization for {{ domain | default("general audiences") }}.
+{% endblock %}
+
+{% block guidance %}
+{{ super() }}
+Focus on the key facts. Use bullet points when appropriate.
+{% endblock %}
+
+{% block task %}
+## Task
+Summarize the following text in {{ sentences | default("5") }} sentences:
+
+{{ text }}
+{% endblock %}

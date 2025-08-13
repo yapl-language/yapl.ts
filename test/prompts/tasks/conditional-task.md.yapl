@@ -1,0 +1,48 @@
+{% extends "../base/system.md.yapl" %}
+{% mixin "../mixins/safety.md.yapl" %}
+
+{% block persona %}
+{{ super() }}
+{% if task_type == "creative" %}
+You are a creative writing assistant.
+{% else %}
+You are an analytical assistant.
+{% endif %}
+{% endblock %}
+
+{% block guidance %}
+{{ super() }}
+{% if difficulty == "beginner" %}
+Use simple language and provide clear explanations.
+{% else %}
+You can use advanced terminology and concepts.
+{% endif %}
+{% endblock %}
+
+{% block task %}
+{% if task_type == "creative" %}
+## Creative Task
+{% if prompt is defined %}
+Write a creative piece based on: {{ prompt }}
+{% else %}
+Write a creative piece on any topic you choose.
+{% endif %}
+
+{% if word_count is defined %}
+Target length: {{ word_count }} words.
+{% endif %}
+{% else %}
+## Analysis Task
+{% if data is defined %}
+Analyze the following data: {{ data }}
+{% else %}
+Provide a general analysis framework.
+{% endif %}
+
+{% if format == "bullet" %}
+Present your analysis in bullet points.
+{% else %}
+Present your analysis in paragraph form.
+{% endif %}
+{% endif %}
+{% endblock %}
