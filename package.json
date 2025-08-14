@@ -68,7 +68,8 @@
 		"vitest": "^3.2.4"
 	},
 	"lint-staged": {
-		"src/**/*.{ts,tsx,js,jsx}": ["biome check --write"],
-		"*.{json,md,css,html}": ["biome check --write"]
+		"src/**/*.ts": ["biome check --write"],
+		"*.md": ["biome check --write"],
+		"package.json": ["biome check --write"]
 	}
 }
