@@ -4,6 +4,12 @@ function resolvePath(basePath: string): string {
 	return basePath.replace(/\\/g, "/").replace(/\/+/g, "/");
 }
 
+function dirname(filePath: string): string {
+	const parts = filePath.split("/");
+	parts.pop(); // Remove the filename
+	return parts.join("/") || "/";
+}
+
 export { default as protectYaplPlugin } from "./markdown/protectYaplPlugin";
 export type {
 	Vars,
@@ -51,6 +57,10 @@ export class YAPL {
 		this.renderer.setBaseDir(this.baseDir);
 	}
 
+	private dirname(filePath: string): string {
+		return dirname(filePath);
+	}
+
 	async renderString(
 		templateSource: string,
 		vars: Record<string, unknown> = {},
@@ -84,6 +94,8 @@ export class YAPL {
 			: templatePath;
 
 		const templateContent = await this.renderer.loadFile(absolutePath);
-		return await this.renderString(templateContent, vars, this.baseDir);
+		// Use the directory of the template file as the current directory
+		const templateDir = this.dirname(absolutePath);
+		return await this.renderString(templateContent, vars, templateDir);
 	}
 }

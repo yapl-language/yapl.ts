@@ -1,7 +1,7 @@
 {
   "name": "@yapl-language/yapl.ts",
   "access": "public",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Modern TypeScript library boilerplate (ESM + CJS) built with Vite, Vitest, and Biome.",
   "keywords": [
     "yapl",
