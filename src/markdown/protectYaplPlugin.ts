@@ -15,7 +15,8 @@ export function protectYaplPlugin(md: any) {
 	const origCodeBlock = md.renderer.rules.code_block;
 	const origCodeInline = md.renderer.rules.code_inline;
 
-	const hasYaplDelimiters = (s: string) => s.includes("{{") || s.includes("{%");
+	const hasYaplDelimiters = (s: string) =>
+		s.includes("{{") || s.includes("{%") || s.includes("{#");
 	const looksLikeYapl = (info: string, content: string) =>
 		info?.toLowerCase().includes("yapl") || hasYaplDelimiters(content);
 

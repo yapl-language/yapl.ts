@@ -1,6 +1,7 @@
 export type Vars = Record<string, unknown>;
 import {
 	BLOCK_REGEX,
+	COMMENT_REGEX,
 	EXTENDS_REGEX,
 	INCLUDE_REGEX,
 	MIXIN_REGEX,
@@ -68,10 +69,15 @@ function dedentText(text: string): string {
 
 function applyTagTrimming(source: string): string {
 	let result = source;
+	// Variable tags
 	result = result.replace(/[ \t]*\{\{-/g, "{{");
-	result = result.replace(/[ \t]*\{%-/g, "{%");
 	result = result.replace(/-\}\}[ \t]*\r?\n?/g, "}}");
+	// Control tags
+	result = result.replace(/[ \t]*\{%-/g, "{%");
 	result = result.replace(/-%\}[ \t]*\r?\n?/g, "%}");
+	// Comment tags
+	result = result.replace(/[ \t]*\{#-/g, "{#");
+	result = result.replace(/-#\}[ \t]*\r?\n?/g, "#}");
 	return result;
 }
 
@@ -159,6 +165,8 @@ export class YAPLRenderer {
 			processedSource,
 			this.whitespaceOptions,
 		);
+		// Strip comments early so they don't interfere with directive parsing
+		processedSource = processedSource.replace(COMMENT_REGEX, "");
 
 		// Handle template inheritance via {% extends %}
 		if (!options?.noExtends) {
