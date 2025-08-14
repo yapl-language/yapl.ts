@@ -31,5 +31,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Dependency check
         uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
       - name: Build
         run: pnpm run build
