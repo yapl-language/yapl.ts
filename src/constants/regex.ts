@@ -15,3 +15,7 @@ export const COMMENT_REGEX = /\{#-?[\s\S]*?-#\}|\{#[\s\S]*?#\}/g;
 // If-else control structures
 export const IF_REGEX =
 	/\{%-?\s*if\s+([^%]+?)\s*-?%\}([\s\S]*?)(?:\{%-?\s*else\s*-?%\}([\s\S]*?))?\{%-?\s*endif\s*-?%\}/g;
+
+// For loop control structures
+export const FOR_REGEX =
+	/\{%-?\s*for\s+([a-zA-Z0-9_]+)\s+in\s+([^%]+?)\s*-?%\}([\s\S]*?)\{%-?\s*endfor\s*-?%\}/g;

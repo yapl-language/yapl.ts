@@ -3,6 +3,7 @@ import {
 	BLOCK_REGEX,
 	COMMENT_REGEX,
 	EXTENDS_REGEX,
+	FOR_REGEX,
 	INCLUDE_REGEX,
 	MIXIN_REGEX,
 	SUPER_REGEX,
@@ -201,7 +202,8 @@ export class YAPLRenderer {
 			processedBlocks,
 			context,
 		);
-		const cleanedSuper = this.stripDirectives(processedIfs, [SUPER_REGEX]);
+		const processedFors = await this.processForLoops(processedIfs, context);
+		const cleanedSuper = this.stripDirectives(processedFors, [SUPER_REGEX]);
 		return this.processVariableInterpolation(cleanedSuper, context.vars);
 	}
 
@@ -490,6 +492,188 @@ export class YAPLRenderer {
 			ifContent: "",
 			elseContent: null,
 		};
+	}
+
+	// ---------- For Loop Processing ----------
+
+	private async processForLoops(
+		content: string,
+		context: RenderContext,
+	): Promise<string> {
+		return await this.processNestedForLoops(content, context);
+	}
+
+	private async processNestedForLoops(
+		content: string,
+		context: RenderContext,
+	): Promise<string> {
+		let result = content;
+		const maxIterations = 50;
+		let iteration = 0;
+		while (iteration < maxIterations) {
+			const newResult = await this.processSingleForLoop(result, context);
+			if (newResult === result) break;
+			result = newResult;
+			iteration++;
+		}
+		return result;
+	}
+
+	private async processSingleForLoop(
+		content: string,
+		context: RenderContext,
+	): Promise<string> {
+		const forMatch = content.match(
+			/\{%-?\s*for\s+([a-zA-Z0-9_]+)\s+in\s+([^%]+?)\s*-?%\}/,
+		);
+		if (!forMatch) return content;
+
+		const forStart = content.indexOf(forMatch[0]);
+		const iteratorVar = forMatch[1];
+		const iterableExpr = forMatch[2].trim();
+
+		const { endforIndex, forContent } = this.findMatchingEndfor(
+			content,
+			forStart,
+		);
+		if (endforIndex === -1) return content;
+
+		// Evaluate the iterable expression
+		const iterableValue = this.evaluateIterableExpression(
+			iterableExpr,
+			context.vars,
+		);
+
+		// Process the loop content for each item
+		let replacement = "";
+		for (const item of iterableValue) {
+			const loopContext = {
+				...context,
+				vars: {
+					...context.vars,
+					[iteratorVar]: item,
+				},
+				depth: context.depth + 1,
+			};
+
+			const processedContent = this.whitespaceOptions.dedentBlocks
+				? dedentText(forContent)
+				: forContent;
+
+			const renderedContent = await this.processTemplate(
+				processedContent,
+				loopContext,
+				{ noExtends: true },
+			);
+			replacement += renderedContent;
+		}
+
+		const endforEnd = content.indexOf("%}", endforIndex) + 2;
+		const fullForStatement = content.slice(forStart, endforEnd);
+		return content.replace(fullForStatement, replacement);
+	}
+
+	private findMatchingEndfor(
+		content: string,
+		forStart: number,
+	): {
+		endforIndex: number;
+		forContent: string;
+	} {
+		let depth = 0;
+		let pos = content.indexOf("%}", forStart) + 2;
+
+		while (pos < content.length) {
+			const nextTagMatch = content.slice(pos).match(/\{%-?\s*(for|endfor)/);
+			if (!nextTagMatch) break;
+
+			const tagStart = pos + (nextTagMatch.index ?? 0);
+			const tagType = nextTagMatch[1];
+
+			if (tagType === "for") {
+				depth++;
+				pos = content.indexOf("%}", tagStart) + 2;
+			} else if (tagType === "endfor") {
+				if (depth === 0) {
+					const forTagEnd = content.indexOf("%}", forStart) + 2;
+					const forContent = content.slice(forTagEnd, tagStart);
+					return { endforIndex: tagStart, forContent };
+				}
+				depth--;
+				pos = content.indexOf("%}", tagStart) + 2;
+			}
+		}
+
+		return {
+			endforIndex: -1,
+			forContent: "",
+		};
+	}
+
+	private evaluateIterableExpression(expr: string, vars: Vars): unknown[] {
+		// Handle direct variable references
+		if (/^[a-zA-Z0-9_.]+$/.test(expr)) {
+			const value = getPath(vars, expr);
+			if (value === undefined || value === null) {
+				return [];
+			}
+			if (!Array.isArray(value)) {
+				throw new Error(
+					`For loop iterable must be an array, got: ${typeof value}`,
+				);
+			}
+			return value;
+		}
+
+		// Handle array literals like [1, 2, 3] or ["a", "b", "c"]
+		if (expr.startsWith("[") && expr.endsWith("]")) {
+			try {
+				const parsed = JSON.parse(expr);
+				if (!Array.isArray(parsed)) {
+					throw new Error(
+						`For loop iterable must be an array, got: ${typeof parsed}`,
+					);
+				}
+				return parsed;
+			} catch (e) {
+				if (
+					e instanceof Error &&
+					e.message.includes("For loop iterable must be an array")
+				) {
+					throw e;
+				}
+				// If JSON parsing fails, try to parse as a simple list
+				const items = expr
+					.slice(1, -1)
+					.split(",")
+					.map((item) => {
+						const trimmed = item.trim();
+						// Remove quotes if present
+						if (
+							(trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+							(trimmed.startsWith("'") && trimmed.endsWith("'"))
+						) {
+							return trimmed.slice(1, -1);
+						}
+						// Try to parse as number
+						const num = Number(trimmed);
+						return Number.isNaN(num) ? trimmed : num;
+					});
+				return items;
+			}
+		}
+
+		// For more complex expressions, try to evaluate them as variables
+		const value = getPath(vars, expr);
+		if (value === undefined || value === null) {
+			return [];
+		}
+		if (!Array.isArray(value)) {
+			throw new Error(
+				`For loop iterable must be an array, got: ${typeof value}`,
+			);
+		}
+		return value;
 	}
 
 	// ---------- Variable Processing ----------

@@ -5,9 +5,11 @@ The official TypeScript implementation of YAPL (Yet Another Prompt Language) —
 <!-- existing badges (do not remove) -->
 
 [![codecov](https://codecov.io/github/yapl-language/yapl.ts/graph/badge.svg?token=7dXxZ4CUM1)](https://codecov.io/github/yapl-language/yapl.ts)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/yapl-language/yapl.ts)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yapl-language/yapl.ts/ci.yml)
 ![NPM Version](https://img.shields.io/npm/v/@yapl-language/yapl.ts)
 ![NPM Downloads](https://img.shields.io/npm/dm/@yapl-language/yapl.ts)
+![GitHub top language](https://img.shields.io/github/languages/top/yapl-language/yapl.ts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/R5CsJHxTeZ)
 
@@ -18,7 +20,7 @@ Quick links: [Website](https://yapl-language.github.io) · [Documentation](https
 YAPL brings the power of modern templating to AI prompt engineering:
 
 - **🧩 Template Inheritance** — Build complex prompts by extending base templates
-- **🔀 Mixins & Composition** — Compose prompts from reusable components  
+- **🔀 Mixins & Composition** — Compose prompts from reusable components
 - **🎯 Dynamic Variables** — Use variables with default values for flexibility
 - **🔀 Conditional Logic** — Adapt prompts based on context and user types
 - **📦 Modular Includes** — Break large prompts into manageable pieces
@@ -33,7 +35,7 @@ YAPL brings the power of modern templating to AI prompt engineering:
 # npm
 npm install @yapl-language/yapl.ts
 
-# pnpm  
+# pnpm
 pnpm add @yapl-language/yapl.ts
 
 # yarn
@@ -68,14 +70,14 @@ You can use technical terminology and advanced concepts.
 Render it with TypeScript:
 
 ```typescript
-import { NodeYAPL } from '@yapl-language/yapl.ts';
+import { NodeYAPL } from "@yapl-language/yapl.ts";
 
-const yapl = new NodeYAPL({ baseDir: './prompts' });
+const yapl = new NodeYAPL({ baseDir: "./prompts" });
 
-const result = await yapl.render('agent.md.yapl', {
-  agent_name: 'CodeBot',
-  domain: 'software development',
-  user_level: 'beginner'
+const result = await yapl.render("agent.md.yapl", {
+  agent_name: "CodeBot",
+  domain: "software development",
+  user_level: "beginner",
 });
 
 console.log(result.content);
@@ -87,53 +89,53 @@ console.log(result.content);
 
 Traditional AI prompts suffer from duplication, inconsistency, and complexity. YAPL solves these problems:
 
-| Problem | YAPL Solution |
-|---------|---------------|
-| **Prompt Duplication** | Template inheritance and mixins |
-| **Hard to Maintain** | Modular, reusable components |
-| **Context Switching** | Dynamic variables and conditionals |
-| **Large Monolithic Prompts** | Includes and composition |
-| **Inconsistent Formatting** | Whitespace control and structure |
+| Problem                      | YAPL Solution                      |
+| ---------------------------- | ---------------------------------- |
+| **Prompt Duplication**       | Template inheritance and mixins    |
+| **Hard to Maintain**         | Modular, reusable components       |
+| **Context Switching**        | Dynamic variables and conditionals |
+| **Large Monolithic Prompts** | Includes and composition           |
+| **Inconsistent Formatting**  | Whitespace control and structure   |
 
 ## 🔧 API Reference
 
 ### Node.js Usage
 
 ```typescript
-import { NodeYAPL } from '@yapl-language/yapl.ts';
+import { NodeYAPL } from "@yapl-language/yapl.ts";
 
 const yapl = new NodeYAPL({
-  baseDir: './prompts',
+  baseDir: "./prompts",
   strictPaths: true,
   maxDepth: 10,
   whitespace: {
     trimBlocks: true,
     lstripBlocks: true,
-    dedentBlocks: true
-  }
+    dedentBlocks: true,
+  },
 });
 
 // Render a template file
-const result = await yapl.render('template.yapl', variables);
+const result = await yapl.render("template.yapl", variables);
 
-// Render a string directly  
+// Render a string directly
 const result = await yapl.renderString(templateSource, variables);
 ```
 
 ### Browser Usage
 
 ```typescript
-import { YAPL } from '@yapl-language/yapl.ts';
+import { YAPL } from "@yapl-language/yapl.ts";
 
 const yapl = new YAPL({
-  baseDir: '/templates',
+  baseDir: "/templates",
   loadFile: async (path) => {
     const response = await fetch(path);
     return response.text();
   },
   resolvePath: (templateRef, fromDir, ensureExt) => {
     return new URL(ensureExt(templateRef), fromDir).href;
-  }
+  },
 });
 
 const result = await yapl.renderString(templateSource, variables);
@@ -143,14 +145,18 @@ const result = await yapl.renderString(templateSource, variables);
 
 ```typescript
 interface YAPLOptions {
-  baseDir: string;                    // Base directory for templates
-  cache?: boolean;                    // Enable template caching (Node.js only)
-  strictPaths?: boolean;              // Strict path resolution (Node.js only)  
-  maxDepth?: number;                  // Maximum include/extend depth (default: 10)
-  whitespace?: WhitespaceOptions;     // Whitespace control options
-  
+  baseDir: string; // Base directory for templates
+  cache?: boolean; // Enable template caching (Node.js only)
+  strictPaths?: boolean; // Strict path resolution (Node.js only)
+  maxDepth?: number; // Maximum include/extend depth (default: 10)
+  whitespace?: WhitespaceOptions; // Whitespace control options
+
   // Browser-specific options
-  resolvePath?: (templateRef: string, fromDir: string, ensureExt: (p: string) => string) => string;
+  resolvePath?: (
+    templateRef: string,
+    fromDir: string,
+    ensureExt: (p: string) => string
+  ) => string;
   loadFile?: (absolutePath: string) => Promise<string>;
   ensureExtension?: (p: string) => string;
 }
@@ -161,17 +167,19 @@ interface YAPLOptions {
 > 📖 **Deep Dive**: For detailed explanations and advanced patterns, see the [Template Inheritance](https://yapl-language.github.io/documentation/features/inheritance/), [Mixins](https://yapl-language.github.io/documentation/features/mixins/), [Variables](https://yapl-language.github.io/documentation/features/variables/), and [Conditionals](https://yapl-language.github.io/documentation/features/conditionals/) guides.
 
 ### Template Inheritance
+
 ```yapl
 {# base.yapl #}
 {% block header %}Default Header{% endblock %}
 {% block content %}{% endblock %}
 
-{# child.yapl #}  
+{# child.yapl #}
 {% extends "base.yapl" %}
 {% block content %}Child Content{% endblock %}
 ```
 
 ### Mixins for Composition
+
 ```yapl
 {# mixins/safety.yapl #}
 {% block guidelines %}
@@ -184,16 +192,18 @@ interface YAPLOptions {
 ```
 
 ### Dynamic Variables
+
 ```yapl
 Hello {{ name | default("there") }}!
 {% if expertise %}You specialize in {{ expertise }}.{% endif %}
 ```
 
 ### Conditional Logic
+
 ```yapl
 {% if user_type == "developer" %}
 Technical documentation follows...
-{% elif user_type == "designer" %}  
+{% elif user_type == "designer" %}
 Design guidelines follow...
 {% else %}
 General information follows...
@@ -205,6 +215,7 @@ General information follows...
 > 🎯 **More Examples**: Explore [AI Agent Templates](https://yapl-language.github.io/documentation/examples/agents/) and [Complex Workflows](https://yapl-language.github.io/documentation/examples/workflows/) for real-world use cases.
 
 ### AI Agent Template
+
 ```yapl
 {# coding-assistant.yapl #}
 {% extends "base/agent.yapl" %}
@@ -217,7 +228,7 @@ You are {{ name | default("CodeBot") }}, an expert programming assistant.
 {% block capabilities %}
 {{ super() }}
 - Write and review code
-- Debug complex issues  
+- Debug complex issues
 - Explain programming concepts
 - Suggest optimizations
 {% endblock %}
@@ -237,6 +248,7 @@ You are {{ name | default("CodeBot") }}, an expert programming assistant.
 ```
 
 ### Multi-Context Prompt
+
 ```yapl
 {# contextual-assistant.yapl #}
 # {{ title | default("AI Assistant") }}
