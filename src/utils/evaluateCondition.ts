@@ -8,6 +8,10 @@ import getPath from "./getPath";
  * Supported operators:
  * - == (equals)
  * - != (not equals)
+ * - >= (greater than or equal)
+ * - <= (less than or equal)
+ * - > (greater than)
+ * - < (less than)
  * - is defined (variable exists and is not null/undefined)
  * - is not defined (variable is null/undefined)
  * - is empty (variable is null/undefined/empty string/empty array)
@@ -71,20 +75,34 @@ export default function evaluateCondition(
 		return notModifier ? !isEmpty : isEmpty;
 	}
 
-	// Handle equality comparisons (== and !=)
-	const comparisonMatch = trimmed.match(/^(.+?)\s*(==|!=)\s*(.+)$/);
+	// Handle all comparison operators (==, !=, >=, <=, >, <)
+	const comparisonMatch = trimmed.match(/^(.+?)\s*(>=|<=|==|!=|>|<)\s*(.+)$/);
 	if (comparisonMatch) {
 		const [, leftExpr, operator, rightExpr] = comparisonMatch;
 		const leftValue = parseValue(leftExpr.trim(), vars);
 		const rightValue = parseValue(rightExpr.trim(), vars);
 
-		if (operator === "==") {
-			return leftValue === rightValue;
-		}
-		if (operator === "!=") {
-			return leftValue !== rightValue;
+		switch (operator) {
+			case "==":
+				return leftValue === rightValue;
+			case "!=":
+				return leftValue !== rightValue;
+			case ">=":
+				return Number(leftValue) >= Number(rightValue);
+			case "<=":
+				return Number(leftValue) <= Number(rightValue);
+			case ">":
+				return Number(leftValue) > Number(rightValue);
+			case "<":
+				return Number(leftValue) < Number(rightValue);
+			default:
+				return false;
 		}
 	}
+
+	// Handle literal boolean values
+	if (trimmed === "true") return true;
+	if (trimmed === "false") return false;
 
 	// Handle simple truthiness check (just a variable name)
 	const simpleVarMatch = trimmed.match(/^[a-zA-Z0-9_.]+$/);

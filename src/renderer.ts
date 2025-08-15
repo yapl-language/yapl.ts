@@ -411,35 +411,65 @@ export class YAPLRenderer {
 		const ifMatch = content.match(/\{%-?\s*if\s+([^%]+?)\s*-?%\}/);
 		if (!ifMatch) return content;
 		const ifStart = content.indexOf(ifMatch[0]);
-		const condition = ifMatch[1];
-		const { endifIndex, ifContent, elseContent } = this.findMatchingEndif(
+		const initialCondition = ifMatch[1];
+		const { endifIndex, conditionalBlocks } = this.findMatchingEndif(
 			content,
 			ifStart,
 		);
 		if (endifIndex === -1) return content;
-		const conditionResult = evaluateCondition(condition, context.vars);
-		let replacement: string;
-		if (conditionResult) {
+
+		// Evaluate conditions in sequence: if, elseif(s), else
+		let replacement = "";
+		let conditionMet = false;
+
+		// Check the initial if condition
+		const ifConditionResult = evaluateCondition(initialCondition, context.vars);
+		if (ifConditionResult) {
 			const processedContent = this.whitespaceOptions.dedentBlocks
-				? dedentText(ifContent)
-				: ifContent;
+				? dedentText(conditionalBlocks.ifContent)
+				: conditionalBlocks.ifContent;
 			replacement = await this.processTemplate(
 				processedContent,
 				{ ...context, depth: context.depth + 1 },
 				{ noExtends: true },
 			);
-		} else if (elseContent !== null) {
-			const processedContent = this.whitespaceOptions.dedentBlocks
-				? dedentText(elseContent)
-				: elseContent;
-			replacement = await this.processTemplate(
-				processedContent,
-				{ ...context, depth: context.depth + 1 },
-				{ noExtends: true },
-			);
-		} else {
-			replacement = "";
+			conditionMet = true;
 		}
+
+		// Check elseif conditions if the if condition was false
+		if (!conditionMet && conditionalBlocks.elseifBlocks.length > 0) {
+			for (const elseifBlock of conditionalBlocks.elseifBlocks) {
+				const elseifConditionResult = evaluateCondition(
+					elseifBlock.condition,
+					context.vars,
+				);
+				if (elseifConditionResult) {
+					const processedContent = this.whitespaceOptions.dedentBlocks
+						? dedentText(elseifBlock.content)
+						: elseifBlock.content;
+					replacement = await this.processTemplate(
+						processedContent,
+						{ ...context, depth: context.depth + 1 },
+						{ noExtends: true },
+					);
+					conditionMet = true;
+					break;
+				}
+			}
+		}
+
+		// Use else content if no conditions were met
+		if (!conditionMet && conditionalBlocks.elseContent !== null) {
+			const processedContent = this.whitespaceOptions.dedentBlocks
+				? dedentText(conditionalBlocks.elseContent)
+				: conditionalBlocks.elseContent;
+			replacement = await this.processTemplate(
+				processedContent,
+				{ ...context, depth: context.depth + 1 },
+				{ noExtends: true },
+			);
+		}
+
 		const endifEnd = content.indexOf("%}", endifIndex) + 2;
 		const fullIfStatement = content.slice(ifStart, endifEnd);
 		return content.replace(fullIfStatement, replacement);
@@ -450,35 +480,102 @@ export class YAPLRenderer {
 		ifStart: number,
 	): {
 		endifIndex: number;
-		elseIndex: number | null;
-		ifContent: string;
-		elseContent: string | null;
+		conditionalBlocks: {
+			ifContent: string;
+			elseifBlocks: Array<{ condition: string; content: string }>;
+			elseContent: string | null;
+		};
 	} {
 		let depth = 0;
-		let elseIndex: number | null = null;
-		let elseTagLength = 0;
+		const blocks: Array<{
+			type: "if" | "elseif" | "else";
+			condition?: string;
+			start: number;
+			end: number;
+		}> = [];
 		let pos = content.indexOf("%}", ifStart) + 2;
+		const ifTagEnd = pos;
+
+		// First, collect all the block boundaries
 		while (pos < content.length) {
-			const nextTagMatch = content.slice(pos).match(/\{%-?\s*(if|else|endif)/);
+			const nextTagMatch = content
+				.slice(pos)
+				.match(/\{%-?\s*(if|elseif|else|endif)/);
 			if (!nextTagMatch) break;
+
 			const tagStart = pos + (nextTagMatch.index ?? 0);
 			const tagType = nextTagMatch[1];
+
 			if (tagType === "if") {
 				depth++;
 				pos = content.indexOf("%}", tagStart) + 2;
-			} else if (tagType === "else" && depth === 0 && elseIndex === null) {
-				elseIndex = tagStart;
-				const tagEnd = content.indexOf("%}", tagStart) + 2;
-				elseTagLength = tagEnd - tagStart;
-				pos = tagEnd;
+			} else if (tagType === "elseif" && depth === 0) {
+				// Extract the condition from the elseif tag
+				const elseifMatch = content
+					.slice(tagStart)
+					.match(/\{%-?\s*elseif\s+([^%]+?)\s*-?%\}/);
+				if (elseifMatch) {
+					const condition = elseifMatch[1];
+					const elseifTagEnd = content.indexOf("%}", tagStart) + 2;
+					blocks.push({
+						type: "elseif",
+						condition,
+						start: tagStart,
+						end: elseifTagEnd,
+					});
+					pos = elseifTagEnd;
+				} else {
+					pos = content.indexOf("%}", tagStart) + 2;
+				}
+			} else if (tagType === "else" && depth === 0) {
+				const elseTagEnd = content.indexOf("%}", tagStart) + 2;
+				blocks.push({ type: "else", start: tagStart, end: elseTagEnd });
+				pos = elseTagEnd;
 			} else if (tagType === "endif") {
 				if (depth === 0) {
-					const ifTagEnd = content.indexOf("%}", ifStart) + 2;
-					const ifContent = content.slice(ifTagEnd, elseIndex || tagStart);
-					const elseContent = elseIndex
-						? content.slice(elseIndex + elseTagLength, tagStart)
-						: null;
-					return { endifIndex: tagStart, elseIndex, ifContent, elseContent };
+					// Found the matching endif
+					const endifIndex = tagStart;
+
+					// Now build the content blocks
+					const currentPos = ifTagEnd;
+					const elseifBlocks: Array<{ condition: string; content: string }> =
+						[];
+					let ifContent = "";
+					let elseContent: string | null = null;
+
+					if (blocks.length === 0) {
+						// Simple if-endif with no elseif or else
+						ifContent = content.slice(ifTagEnd, endifIndex);
+					} else {
+						// Extract if content (from if tag end to first block)
+						ifContent = content.slice(ifTagEnd, blocks[0].start);
+
+						// Process each block
+						for (let i = 0; i < blocks.length; i++) {
+							const block = blocks[i];
+							const nextBlockStart =
+								i + 1 < blocks.length ? blocks[i + 1].start : endifIndex;
+							const blockContent = content.slice(block.end, nextBlockStart);
+
+							if (block.type === "elseif" && block.condition) {
+								elseifBlocks.push({
+									condition: block.condition,
+									content: blockContent,
+								});
+							} else if (block.type === "else") {
+								elseContent = blockContent;
+							}
+						}
+					}
+
+					return {
+						endifIndex,
+						conditionalBlocks: {
+							ifContent,
+							elseifBlocks,
+							elseContent,
+						},
+					};
 				}
 				depth--;
 				pos = content.indexOf("%}", tagStart) + 2;
@@ -486,11 +583,14 @@ export class YAPLRenderer {
 				pos = content.indexOf("%}", tagStart) + 2;
 			}
 		}
+
 		return {
 			endifIndex: -1,
-			elseIndex: null,
-			ifContent: "",
-			elseContent: null,
+			conditionalBlocks: {
+				ifContent: "",
+				elseifBlocks: [],
+				elseContent: null,
+			},
 		};
 	}
 
