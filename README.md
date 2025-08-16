@@ -24,10 +24,8 @@ YAPL brings the power of modern templating to AI prompt engineering:
 - **🎯 Dynamic Variables** — Use variables with default values for flexibility
 - **🔀 Conditional Logic** — Adapt prompts based on context and user types
 - **📦 Modular Includes** — Break large prompts into manageable pieces
-- **🎨 Whitespace Control** — Fine-tune output formatting
 - **🌐 Universal** — Works in Node.js and browsers (ESM + CJS)
 - **⚡ Fast** — Optimized rendering with smart caching
-- **🔒 Type Safe** — Full TypeScript support with comprehensive types
 
 ## 🚀 Installation
 
@@ -54,16 +52,16 @@ Create your first YAPL template:
 {% mixin "mixins/friendly.md.yapl" %}
 
 {% block persona %}
-You are {{ agent_name | default("a helpful AI assistant") }} specializing in {{ domain }}.
+  You are {{ agent_name | default("a helpful AI assistant") }} specializing in {{ domain }}.
 {% endblock %}
 
 {% block guidance %}
-{{ super() }}
-{% if user_level == "beginner" %}
-Use simple language and provide step-by-step explanations.
-{% else %}
-You can use technical terminology and advanced concepts.
-{% endif %}
+  {{ super() }}
+  {% if user_level == "beginner" %}
+    Use simple language and provide step-by-step explanations.
+  {% else %}
+    You can use technical terminology and advanced concepts.
+  {% endif %}
 {% endblock %}
 ```
 
@@ -84,18 +82,6 @@ console.log(result.content);
 ```
 
 > 📚 **Learn More**: Check out the [Quick Start Guide](https://yapl-language.github.io/documentation/quick-start/) for a step-by-step tutorial, or explore [Basic Examples](https://yapl-language.github.io/documentation/examples/basic/) to see more patterns.
-
-## 🌟 Why YAPL?
-
-Traditional AI prompts suffer from duplication, inconsistency, and complexity. YAPL solves these problems:
-
-| Problem                      | YAPL Solution                      |
-| ---------------------------- | ---------------------------------- |
-| **Prompt Duplication**       | Template inheritance and mixins    |
-| **Hard to Maintain**         | Modular, reusable components       |
-| **Context Switching**        | Dynamic variables and conditionals |
-| **Large Monolithic Prompts** | Includes and composition           |
-| **Inconsistent Formatting**  | Whitespace control and structure   |
 
 ## 🔧 API Reference
 
@@ -162,7 +148,7 @@ interface YAPLOptions {
 }
 ```
 
-## 🎯 Core Concepts
+## 🎯 Language Concepts
 
 > 📖 **Deep Dive**: For detailed explanations and advanced patterns, see the [Template Inheritance](https://yapl-language.github.io/documentation/features/inheritance/), [Mixins](https://yapl-language.github.io/documentation/features/mixins/), [Variables](https://yapl-language.github.io/documentation/features/variables/), and [Conditionals](https://yapl-language.github.io/documentation/features/conditionals/) guides.
 
@@ -170,12 +156,16 @@ interface YAPLOptions {
 
 ```yapl
 {# base.yapl #}
-{% block header %}Default Header{% endblock %}
+{% block header %}
+  Default Header
+{% endblock %}
 {% block content %}{% endblock %}
 
 {# child.yapl #}
 {% extends "base.yapl" %}
-{% block content %}Child Content{% endblock %}
+{% block content %}
+  Child Content
+{% endblock %}
 ```
 
 ### Mixins for Composition
@@ -183,8 +173,8 @@ interface YAPLOptions {
 ```yapl
 {# mixins/safety.yapl #}
 {% block guidelines %}
-{{ super() }}
-- Never provide harmful information
+  {{ super() }}
+  - Never provide harmful information
 {% endblock %}
 
 {# agent.yapl #}
@@ -195,18 +185,20 @@ interface YAPLOptions {
 
 ```yapl
 Hello {{ name | default("there") }}!
-{% if expertise %}You specialize in {{ expertise }}.{% endif %}
+{% if expertise %}
+  You specialize in {{ expertise }}.
+{% endif %}
 ```
 
 ### Conditional Logic
 
 ```yapl
 {% if user_type == "developer" %}
-Technical documentation follows...
+  Technical documentation follows...
 {% elif user_type == "designer" %}
-Design guidelines follow...
+  Design guidelines follow...
 {% else %}
-General information follows...
+  General information follows...
 {% endif %}
 ```
 
@@ -222,28 +214,28 @@ General information follows...
 {% mixin "mixins/helpful.yapl", "mixins/technical.yapl" %}
 
 {% block persona %}
-You are {{ name | default("CodeBot") }}, an expert programming assistant.
+  You are {{ name | default("CodeBot") }}, an expert programming assistant.
 {% endblock %}
 
 {% block capabilities %}
-{{ super() }}
-- Write and review code
-- Debug complex issues
-- Explain programming concepts
-- Suggest optimizations
+  {{ super() }}
+  - Write and review code
+  - Debug complex issues
+  - Explain programming concepts
+  - Suggest optimizations
 {% endblock %}
 
 {% block guidelines %}
-{{ super() }}
-{% if user_level == "beginner" %}
-- Use simple explanations
-- Provide step-by-step guidance
-- Include plenty of examples
-{% else %}
-- Use technical terminology
-- Focus on best practices
-- Provide concise expert advice
-{% endif %}
+  {{ super() }}
+  {% if user_level == "beginner" %}
+    - Use simple explanations
+    - Provide step-by-step guidance
+    - Include plenty of examples
+  {% else %}
+    - Use technical terminology
+    - Focus on best practices
+    - Provide concise expert advice
+  {% endif %}
 {% endblock %}
 ```
 
@@ -254,13 +246,13 @@ You are {{ name | default("CodeBot") }}, an expert programming assistant.
 # {{ title | default("AI Assistant") }}
 
 {% if context == "customer_support" %}
-You are a patient, empathetic customer support agent.
-Focus on resolving issues and ensuring customer satisfaction.
-{% elif context == "tutoring" %}
-You are an encouraging tutor who breaks down complex concepts.
-Check for understanding and provide practice opportunities.
+  You are a patient, empathetic customer support agent.
+  Focus on resolving issues and ensuring customer satisfaction.
+{% elseif context == "tutoring" %}
+  You are an encouraging tutor who breaks down complex concepts.
+  Check for understanding and provide practice opportunities.
 {% else %}
-You are a helpful general assistant.
+  You are a helpful general assistant.
 {% endif %}
 
 {% include "components/safety-guidelines.yapl" %}
@@ -288,14 +280,6 @@ pnpm run typecheck
 # Run all checks
 pnpm run check
 ```
-
-## 📊 Project Stats
-
-- **Bundle Size**: ~15KB minified + gzipped
-- **Test Coverage**: 95%+ with comprehensive test suite
-- **TypeScript**: Full type safety and IntelliSense support
-- **Compatibility**: Node.js 18+ and modern browsers
-- **Dependencies**: Zero runtime dependencies
 
 ## 🤝 Contributing
 

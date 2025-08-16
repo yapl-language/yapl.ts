@@ -61,8 +61,11 @@ function dedentText(text: string): string {
 	const nonEmptyLines = lines.filter((line) => line.trim().length > 0);
 	if (nonEmptyLines.length === 0) return text;
 	const indentLengths = nonEmptyLines.map((line) => {
-		const match = line.match(/^[ \t]*/);
-		return match ? match[0].length : 0;
+		// Compute leading whitespace length
+		// The regex /^[ \t]*/ will always match (even if empty)
+		const leading = line.match(/^[ \t]*/);
+		// This should never happen, but we include a fallback for safety
+		return leading?.[0].length ?? 0;
 	});
 	const minIndent = Math.min(...indentLengths);
 	return lines.map((line) => line.slice(minIndent)).join("\n");
@@ -503,7 +506,8 @@ export class YAPLRenderer {
 				.match(/\{%-?\s*(if|elseif|else|endif)/);
 			if (!nextTagMatch) break;
 
-			const tagStart = pos + (nextTagMatch.index ?? 0);
+			// nextTagMatch.index is always a number on successful match; avoid nullish coalescing branch
+			const tagStart = pos + (nextTagMatch.index as number);
 			const tagType = nextTagMatch[1];
 
 			if (tagType === "if") {
@@ -687,7 +691,8 @@ export class YAPLRenderer {
 			const nextTagMatch = content.slice(pos).match(/\{%-?\s*(for|endfor)/);
 			if (!nextTagMatch) break;
 
-			const tagStart = pos + (nextTagMatch.index ?? 0);
+			// nextTagMatch.index is always a number on successful match; avoid nullish coalescing branch
+			const tagStart = pos + (nextTagMatch.index as number);
 			const tagType = nextTagMatch[1];
 
 			if (tagType === "for") {
@@ -899,7 +904,8 @@ export class YAPLRenderer {
 		let lastIndex = 0;
 		const matches = Array.from(content.matchAll(regex));
 		for (const match of matches) {
-			const matchIndex = match.index ?? 0;
+			// match.index is always defined on successful match; avoid nullish coalescing branch
+			const matchIndex = match.index as number;
 			replacementPromises.push(
 				Promise.resolve(content.slice(lastIndex, matchIndex)),
 			);

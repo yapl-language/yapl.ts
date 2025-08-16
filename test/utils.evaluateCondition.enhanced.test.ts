@@ -16,9 +16,15 @@ describe("evaluateCondition - Enhanced Operators", () => {
 		});
 
 		it("should handle > (greater than)", () => {
-			expect(evaluateCondition("temperature > 30", { temperature: 35 })).toBe(true);
-			expect(evaluateCondition("temperature > 30", { temperature: 30 })).toBe(false);
-			expect(evaluateCondition("temperature > 30", { temperature: 25 })).toBe(false);
+			expect(evaluateCondition("temperature > 30", { temperature: 35 })).toBe(
+				true,
+			);
+			expect(evaluateCondition("temperature > 30", { temperature: 30 })).toBe(
+				false,
+			);
+			expect(evaluateCondition("temperature > 30", { temperature: 25 })).toBe(
+				false,
+			);
 		});
 
 		it("should handle < (less than)", () => {
@@ -28,13 +34,17 @@ describe("evaluateCondition - Enhanced Operators", () => {
 		});
 
 		it("should handle string comparisons", () => {
-			expect(evaluateCondition('version >= "2.0"', { version: "2.1" })).toBe(true);
-			expect(evaluateCondition('version >= "2.0"', { version: "1.9" })).toBe(false);
+			expect(evaluateCondition('version >= "2.0"', { version: "2.1" })).toBe(
+				true,
+			);
+			expect(evaluateCondition('version >= "2.0"', { version: "1.9" })).toBe(
+				false,
+			);
 		});
 
 		it("should handle decimal numbers", () => {
-			expect(evaluateCondition("price >= 19.99", { price: 20.00 })).toBe(true);
-			expect(evaluateCondition("price >= 19.99", { price: 19.50 })).toBe(false);
+			expect(evaluateCondition("price >= 19.99", { price: 20.0 })).toBe(true);
+			expect(evaluateCondition("price >= 19.99", { price: 19.5 })).toBe(false);
 		});
 	});
 
@@ -50,15 +60,36 @@ describe("evaluateCondition - Enhanced Operators", () => {
 
 	describe("Complex conditions with new operators", () => {
 		it("should handle multiple comparison operators in logical expressions", () => {
-			expect(evaluateCondition("age >= 18 and score > 80", { age: 25, score: 85 })).toBe(true);
-			expect(evaluateCondition("age >= 18 and score > 80", { age: 16, score: 85 })).toBe(false);
-			expect(evaluateCondition("age >= 18 and score > 80", { age: 25, score: 75 })).toBe(false);
+			expect(
+				evaluateCondition("age >= 18 and score > 80", { age: 25, score: 85 }),
+			).toBe(true);
+			expect(
+				evaluateCondition("age >= 18 and score > 80", { age: 16, score: 85 }),
+			).toBe(false);
+			expect(
+				evaluateCondition("age >= 18 and score > 80", { age: 25, score: 75 }),
+			).toBe(false);
 		});
 
 		it("should handle OR conditions with comparisons", () => {
-			expect(evaluateCondition("score >= 90 or bonus_points > 10", { score: 95, bonus_points: 5 })).toBe(true);
-			expect(evaluateCondition("score >= 90 or bonus_points > 10", { score: 85, bonus_points: 15 })).toBe(true);
-			expect(evaluateCondition("score >= 90 or bonus_points > 10", { score: 85, bonus_points: 5 })).toBe(false);
+			expect(
+				evaluateCondition("score >= 90 or bonus_points > 10", {
+					score: 95,
+					bonus_points: 5,
+				}),
+			).toBe(true);
+			expect(
+				evaluateCondition("score >= 90 or bonus_points > 10", {
+					score: 85,
+					bonus_points: 15,
+				}),
+			).toBe(true);
+			expect(
+				evaluateCondition("score >= 90 or bonus_points > 10", {
+					score: 85,
+					bonus_points: 5,
+				}),
+			).toBe(false);
 		});
 	});
 
@@ -79,8 +110,12 @@ describe("evaluateCondition - Enhanced Operators", () => {
 		});
 
 		it("should handle negative numbers", () => {
-			expect(evaluateCondition("temperature >= -5", { temperature: -3 })).toBe(true);
-			expect(evaluateCondition("temperature >= -5", { temperature: -10 })).toBe(false);
+			expect(evaluateCondition("temperature >= -5", { temperature: -3 })).toBe(
+				true,
+			);
+			expect(evaluateCondition("temperature >= -5", { temperature: -10 })).toBe(
+				false,
+			);
 		});
 	});
 });
