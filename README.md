@@ -1,4 +1,4 @@
-# <img src="https://yapl-language.github.io/assets/yapl-logo.svg" alt="YAPL" width="28" height="28" /> YAPL TypeScript
+# <img src="https://raw.githubusercontent.com/yapl-language/yapl-vscode/refs/heads/main/images/icon.png" alt="YAPL" width="28" height="28" /> YAPL TypeScript
 
 The official TypeScript implementation of YAPL (Yet Another Prompt Language) — a tiny, composable prompt templating language designed for AI agents.
 
