@@ -1,7 +1,7 @@
 {
   "name": "@yapl-language/yapl.ts",
   "access": "public",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Templating language to write structured and reusable prompts for AI Agents.",
   "keywords": [
     "yapl",
@@ -50,7 +50,7 @@
     "build": "vite build",
     "dev": "vitest",
     "test": "vitest run --coverage",
-    "lint": "biome lint .",
+    "lint": "biome lint src",
     "format": "biome format --write .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "biome ci src && tsc -p tsconfig.json --noEmit",

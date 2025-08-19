@@ -21,7 +21,8 @@ import { YAPLRenderer } from "./renderer";
 import type { Prompt, WhitespaceOptions } from "./renderer";
 
 export interface YAPLOptions {
-	baseDir: string;
+	/** Base directory (or directories) for templates */
+	baseDir: string | string[];
 	cache?: boolean; // unused in browser wrapper
 	strictPaths?: boolean; // unused in browser wrapper
 	maxDepth?: number;
@@ -39,15 +40,86 @@ export interface YAPLOptions {
 export class YAPL {
 	protected baseDir: string;
 	protected renderer: YAPLRenderer;
+	protected baseDirs: string[] = [];
+	protected remoteAliases: Record<string, string> = {};
 
 	constructor(opts: YAPLOptions) {
-		this.baseDir = resolvePath(opts.baseDir);
+		const inputBases = Array.isArray(opts.baseDir)
+			? opts.baseDir
+			: [opts.baseDir];
+		// Normalize to forward-slash paths/URLs
+		this.baseDirs = inputBases.map((b) => resolvePath(b));
+		// Backwards-compat primary baseDir remains the first entry
+		const initialBase = this.baseDirs[0] ?? "";
+		this.baseDir = resolvePath(initialBase);
+
+		// Known alias for remote prompts repo
+		if (this.baseDirs.includes("@awesome-yapl")) {
+			this.remoteAliases["@awesome-yapl"] =
+				"https://raw.githubusercontent.com/yapl-language/awesome-yapl/main/prompts";
+		}
+
+		// In browser: if user provides hooks, use them.
+		// Otherwise, provide defaults only when dealing with URL/alias usage.
+		const hasRemoteBases = this.baseDirs.some(
+			(b) =>
+				b.startsWith("http://") ||
+				b.startsWith("https://") ||
+				b === "@awesome-yapl",
+		);
+
+		const defaultResolvePath = (
+			templateRef: string,
+			fromDir: string,
+			ensureExt: (p: string) => string,
+		): string => {
+			const ref = ensureExt(templateRef);
+			// Alias mapping
+			for (const [alias, baseUrl] of Object.entries(this.remoteAliases)) {
+				if (ref.startsWith(`${alias}/`)) {
+					const rest = ref.slice(alias.length + 1);
+					return `${baseUrl}/${rest}`;
+				}
+			}
+			// Absolute URL passthrough
+			if (/^https?:\/\//.test(ref)) return ref;
+			// Relative path (./ or ../): resolve against fromDir
+			if (ref.startsWith("./") || ref.startsWith("../")) {
+				return resolvePath(`${fromDir}/${ref}`);
+			}
+			// Root-relative: prefer the last baseDir
+			for (let i = this.baseDirs.length - 1; i >= 0; i--) {
+				const baseI = this.baseDirs[i];
+				if (!baseI) continue;
+				if (baseI === "@awesome-yapl") {
+					const baseUrl = this.remoteAliases["@awesome-yapl"];
+					return `${baseUrl}/${ref}`;
+				}
+				// Treat base as URL-like prefix
+				if (baseI.startsWith("http://") || baseI.startsWith("https://")) {
+					return resolvePath(`${baseI}/${ref}`);
+				}
+				// Fallback: resolve from initial baseDir
+			}
+			return resolvePath(`${fromDir}/${ref}`);
+		};
+
+		const defaultLoadFile = async (absolutePath: string): Promise<string> => {
+			const res = await fetch(absolutePath);
+			if (!res.ok) {
+				throw new Error(`Failed to fetch ${absolutePath}: ${res.status}`);
+			}
+			return await res.text();
+		};
+
 		this.renderer = new YAPLRenderer({
 			baseDir: this.baseDir,
 			maxDepth: opts.maxDepth,
 			whitespace: opts.whitespace,
-			resolvePath: opts.resolvePath,
-			loadFile: opts.loadFile,
+			// Only provide defaults if the user didn't and we have remote-style bases
+			resolvePath:
+				opts.resolvePath ?? (hasRemoteBases ? defaultResolvePath : undefined),
+			loadFile: opts.loadFile ?? (hasRemoteBases ? defaultLoadFile : undefined),
 			ensureExtension: opts.ensureExtension,
 		});
 	}

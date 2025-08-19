@@ -68,9 +68,29 @@ Create your first YAPL template:
 Render it with TypeScript:
 
 ```typescript
+// For Node.js environments
 import { NodeYAPL } from "@yapl-language/yapl.ts";
 
+// Single base directory (backwards compatible)
 const yapl = new NodeYAPL({ baseDir: "./prompts" });
+
+// Multiple base directories and remote alias support
+// - You can pass an array for baseDir. Each entry is either
+//   a local directory or the special alias "@awesome-yapl".
+// - If the same relative path exists in multiple baseDirs, the LAST directory wins.
+// - When using the alias, paths starting with "@awesome-yapl/" are fetched from
+//   https://raw.githubusercontent.com/yapl-language/awesome-yapl/main/prompts
+const yaplMulti = new NodeYAPL({
+  baseDir: [
+    "./company-prompts",     // private/local repository
+    "./prompts",             // default local prompts
+    "@awesome-yapl",         // public remote prompts (GitHub)
+  ],
+});
+
+// You can now load local files or remote ones via the alias
+await yaplMulti.render("tasks/summarize.md.yapl", { domain: "news" });
+await yaplMulti.render("@awesome-yapl/agent/base.md.yapl", { name: "Neo" });
 
 const result = await yapl.render("agent.md.yapl", {
   agent_name: "CodeBot",
@@ -80,6 +100,11 @@ const result = await yapl.render("agent.md.yapl", {
 
 console.log(result.content);
 ```
+
+> 📦 **Note**: To use `NodeYAPL`, you need to have the package properly exported. If the direct import doesn't work, you can import it directly from the node module:
+> ```typescript
+> import { NodeYAPL } from "@yapl-language/yapl.ts/dist/node";
+> ```
 
 > 📚 **Learn More**: Check out the [Quick Start Guide](https://yapl-language.github.io/documentation/quick-start/) for a step-by-step tutorial, or explore [Basic Examples](https://yapl-language.github.io/documentation/examples/basic/) to see more patterns.
 
@@ -91,7 +116,8 @@ console.log(result.content);
 import { NodeYAPL } from "@yapl-language/yapl.ts";
 
 const yapl = new NodeYAPL({
-  baseDir: "./prompts",
+  // You can pass a string or an array for multiple base directories
+  baseDir: ["./prompts", "@awesome-yapl"],
   strictPaths: true,
   maxDepth: 10,
   whitespace: {
@@ -131,7 +157,7 @@ const result = await yapl.renderString(templateSource, variables);
 
 ```typescript
 interface YAPLOptions {
-  baseDir: string; // Base directory for templates
+  baseDir: string | string[]; // Base directory (or directories) for templates
   cache?: boolean; // Enable template caching (Node.js only)
   strictPaths?: boolean; // Strict path resolution (Node.js only)
   maxDepth?: number; // Maximum include/extend depth (default: 10)

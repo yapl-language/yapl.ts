@@ -36,7 +36,9 @@
 	},
 	"files": {
 		"ignore": [
+			"coverage",
 			"coverage/**",
+			"**/coverage/**",
 			"dist/**",
 			"node_modules/**",
 			".vscode/**",
