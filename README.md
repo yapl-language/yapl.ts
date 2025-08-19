@@ -101,11 +101,6 @@ const result = await yapl.render("agent.md.yapl", {
 console.log(result.content);
 ```
 
-> 📦 **Note**: To use `NodeYAPL`, you need to have the package properly exported. If the direct import doesn't work, you can import it directly from the node module:
-> ```typescript
-> import { NodeYAPL } from "@yapl-language/yapl.ts/dist/node";
-> ```
-
 > 📚 **Learn More**: Check out the [Quick Start Guide](https://yapl-language.github.io/documentation/quick-start/) for a step-by-step tutorial, or explore [Basic Examples](https://yapl-language.github.io/documentation/examples/basic/) to see more patterns.
 
 ## 🔧 API Reference
