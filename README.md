@@ -108,7 +108,7 @@ console.log(result.content);
 ### Node.js Usage
 
 ```typescript
-import { NodeYAPL } from "@yapl-language/yapl.ts";
+import { NodeYAPL } from "@yapl-language/yapl.ts/node";
 
 const yapl = new NodeYAPL({
   // You can pass a string or an array for multiple base directories

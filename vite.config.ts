@@ -11,6 +11,13 @@ export default defineConfig({
 			},
 			name: "YAPL",
 			formats: ["es", "cjs"],
+			fileName: (format, entryName) => {
+				if (format === "es") {
+					return `${entryName}.js`;
+				} else {
+					return `${entryName}.cjs`;
+				}
+			},
 		},
 		sourcemap: true,
 		target: "es2020",
