@@ -1,6 +1,6 @@
 import { promises as fs, existsSync } from "node:fs";
 import * as path from "node:path";
-import { type Prompt, type Vars, type YAPLOptions } from "./index";
+import type { Prompt, Vars, YAPLOptions } from "./index";
 import { YAPL } from "./index";
 import { YAPLRenderer } from "./renderer";
 
