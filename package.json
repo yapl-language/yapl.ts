@@ -1,7 +1,7 @@
 {
   "name": "@yapl-language/yapl.ts",
   "access": "public",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Templating language to write structured and reusable prompts for AI Agents.",
   "keywords": [
     "yapl",
